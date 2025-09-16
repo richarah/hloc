@@ -1,18 +1,22 @@
-# HLS monorepo - INTERNAL USE ONLY
+# HLS monorepo - Internal use only
 
-Monorepo for internal projects of Haydon Laastad Systems (name is tentative, it came to me in a dream)
+Monorepo for internal projects of Haydon Laastad Systems (name is tentative, order may be reversed, it came to me in a dream)
 
-This is as WIP as it gets. Major changes may occur at any time.
+Work in progress. Major changes may occur at any time.
 
 #### Demos (TBD)
 
-- SLAM from single moving viewport (sousveillance or FPV drone footage)
+- SLAM from single moving viewport (sousveillance or FPV drone footage). Realtime if possible
 
-- Tomographic 3D reconstruction from partially-overlapping static viewports (CCTV footage or similar)
+- Tomographic 3D reconstruction from partially-overlapping static viewports (CCTV footage or similar). Realtime if possible
 
 - Viewport calibration (Aruco/ChAruco pattern unless more suitable standards exist)
 
 - Rendering from point cloud?
+
+**Speculative:**
+
+- SLAM + sensor fusion, multiple viewports? See tank example from presentation
 
 #### Modules
 
@@ -28,4 +32,8 @@ This is as WIP as it gets. Major changes may occur at any time.
 - explore possibilities for replacing/augmenting COLMAP components in SfM/SLAM pipeline with GLOMAP
 - integrate Skye, real-time visualisation
 
+**Outside this repo**
 
+- server
+
+- 
