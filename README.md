@@ -1,4 +1,4 @@
-# LHS
+# HLS
 
 Monorepo for internal projects of Haydon Laastad Systems (TENTATIVE, just the first name that sprung to mind)
 
