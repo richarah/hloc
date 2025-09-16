@@ -1,3 +1,6 @@
 [submodule "COLMAP_SLAM"]
-	path = COLMAP_SLAM
+	path = modules/COLMAP_SLAM
 	url = https://github.com/richarah/COLMAP_SLAM
+[submodule "modules/Skye"]
+	path = modules/Skye
+	url = https://github.com/m-schuetz/Skye
