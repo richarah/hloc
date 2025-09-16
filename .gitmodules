@@ -1,0 +1,3 @@
+[submodule "COLMAP_SLAM"]
+	path = COLMAP_SLAM
+	url = https://github.com/richarah/COLMAP_SLAM
