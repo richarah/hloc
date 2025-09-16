@@ -4,3 +4,6 @@
 [submodule "modules/Skye"]
 	path = modules/Skye
 	url = https://github.com/m-schuetz/Skye
+[submodule "modules/glomap"]
+	path = modules/glomap
+	url = https://github.com/richarah/glomap.git
