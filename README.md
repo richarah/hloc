@@ -40,6 +40,7 @@ The program consists of three main components:
 - finish demos
 - explore possibilities for replacing/augmenting COLMAP components in SfM/SLAM pipeline with GLOMAP
 - integrate Skye, real-time visualisation
+- fix builds of submodules
 
 **Outside this repo**
 

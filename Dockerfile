@@ -90,16 +90,15 @@ RUN apt-get update && apt-get install -y colmap && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /workspace/
 RUN pip3 install --no-cache-dir --upgrade pip && \
     pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
-    pip3 install --no-cache-dir hloc && \
     pip3 install --no-cache-dir pycolmap && \
     pip3 install --no-cache-dir pyceres && \
     pip3 install --no-cache-dir -r requirements.txt
 
-# Install hloc (Hierarchical Localization) - COMMENTED OUT FOR SPEED
-# RUN git clone --recursive https://github.com/cvg/Hierarchical-Localization.git /tmp/hloc && \
-#     cd /tmp/hloc && \
-#     pip3 install -e . && \
-#     rm -rf /tmp/hloc/.git
+# Install hloc (Hierarchical Localization)
+RUN git clone --recursive https://github.com/cvg/Hierarchical-Localization.git /tmp/hloc && \
+    cd /tmp/hloc && \
+    pip3 install -e . && \
+    rm -rf /tmp/hloc/.git
 
 # Install pyceres - COMMENTED OUT FOR SPEED
 # RUN git clone https://github.com/cvg/pyceres.git /tmp/pyceres && \
