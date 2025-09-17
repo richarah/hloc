@@ -33,6 +33,8 @@ The program consists of three main components:
 
 - **glomap** - Global SfM. COLMAP alternative, possibly to be used for augmenting SLAM pipeline. Faster in benchmarks, efficacy yet to be assessed for our use-case
 
+- **voxelprojection** - pixel to voxel projection
+
 #### Todos
 
 - finish demos
