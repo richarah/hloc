@@ -23,6 +23,9 @@ services:
       - PYTHONPATH=/workspace
     deploy:
       resources:
+        limits:
+          memory: 6G
+          cpus: '4'
         reservations:
           devices:
             - driver: nvidia
@@ -47,6 +50,9 @@ services:
       - PYTHONPATH=/workspace
     deploy:
       resources:
+        limits:
+          memory: 6G
+          cpus: '4'
         reservations:
           devices:
             - driver: nvidia

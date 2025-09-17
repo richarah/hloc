@@ -4,6 +4,13 @@ Monorepo for internal projects of Haydon Laastad Systems (name is tentative, ord
 
 Work in progress. Major changes may occur at any time.
 
+#### What's this?
+
+The program consists of three main components:
+- Calibration pipeline, figures out camera parameters
+- Photogrammetry pipeline, localises where the cameras are in relation to each other in 3D space
+- Detection pipeline. 2D plane sensing for low-latency object detection & tracking
+
 #### Demos (TBD)
 
 - SLAM from single moving viewport (sousveillance or FPV drone footage). Realtime if possible
