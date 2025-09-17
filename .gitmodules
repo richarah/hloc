@@ -7,3 +7,6 @@
 [submodule "modules/glomap"]
 	path = modules/glomap
 	url = https://github.com/richarah/glomap.git
+[submodule "modules/voxelprojection"]
+	path = modules/voxelprojection
+	url = https://github.com/richarah/voxelprojection.git
