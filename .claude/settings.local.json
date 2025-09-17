@@ -6,7 +6,8 @@
       "Bash(chmod:*)",
       "Bash(docker-compose up:*)",
       "Bash(docker-compose:*)",
-      "Bash(dos2unix:*)"
+      "Bash(dos2unix:*)",
+      "WebFetch(domain:colmap.github.io)"
     ],
     "deny": []
   }
