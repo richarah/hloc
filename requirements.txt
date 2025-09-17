@@ -53,4 +53,4 @@ click>=8.0.0
 memory-profiler>=0.60.0
 
 # GPU acceleration utilities
-pynvml>=11.0.0
+nvidia-ml-py>=11.0.0
