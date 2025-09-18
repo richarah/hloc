@@ -14,7 +14,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install COLMAP from the official repository
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     && apt-get clean \

@@ -16,7 +16,8 @@
       "WebFetch(domain:github.com)",
       "Bash(mv:*)",
       "Bash(python:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }
