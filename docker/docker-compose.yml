@@ -22,3 +22,10 @@ services:
     tty: true
     working_dir: /app
     shm_size: '2gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
