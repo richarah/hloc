@@ -163,7 +163,7 @@ def plot_image_colmap(
     """Plot a camera frustum from a PyCOLMAP image."""
     plot_camera_colmap(
         fig,
-        image.cam_from_world(),
+        image.cam_from_world,
         camera,
         name=name or str(image.image_id),
         text=str(image),
@@ -192,11 +192,21 @@ def plot_reconstruction(
     # Filter outliers
     bbs = rec.compute_bounding_box(0.001, 0.999)
     # Filter points, use original reproj error here
+    def point_in_bbox(point, bbox):
+        """Check if point is within bounding box (min, max)
+        
+        Compatibility fix for pycolmap API change where compute_bounding_box()
+        now returns a tuple (min_point, max_point) instead of an object with
+        contains_point() method.
+        """
+        min_pt, max_pt = bbox
+        return all(min_pt[i] <= point[i] <= max_pt[i] for i in range(3))
+    
     p3Ds = [
         p3D
         for _, p3D in rec.points3D.items()
         if (
-            bbs.contains_point(p3D.xyz)
+            point_in_bbox(p3D.xyz, bbs)
             and p3D.error <= max_reproj_error
             and p3D.track.length() >= min_track_length
         )

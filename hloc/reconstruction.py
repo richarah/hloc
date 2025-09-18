@@ -1,3 +1,5 @@
+from __future__ import annotations # PATCH
+
 import argparse
 import multiprocessing
 import shutil
@@ -44,10 +46,10 @@ def import_images(
         raise IOError(f"No images found in {image_dir}.")
     with pycolmap.ostream():
         pycolmap.import_images(
-            database_path,
-            image_dir,
+            str(database_path), # convert posix paths to str so WSL doesn't get confused
+            str(image_dir),
             camera_mode,
-            image_names=image_list or [],
+            image_list=image_list or [],
             options=options,
         )
 
@@ -138,9 +140,11 @@ def run_reconstruction(
         "frames.bin",
         "rigs.bin",
     ]:
-        if (sfm_dir / filename).exists():
-            (sfm_dir / filename).unlink()
-        shutil.move(str(models_path / str(largest_index) / filename), str(sfm_dir))
+        src_file = models_path / str(largest_index) / filename
+        if src_file.exists():
+            if (sfm_dir / filename).exists():
+                (sfm_dir / filename).unlink()
+            shutil.move(str(src_file), str(sfm_dir))
     return reconstructions[largest_index]
 
 
