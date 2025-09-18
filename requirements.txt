@@ -12,8 +12,10 @@ pillow>=8.0.0
 # 3D processing and visualization
 open3d>=0.13.0
 
-# COLMAP Python bindings (flexible version)
-pycolmap
+# COLMAP Python bindings
+# NOTE: ignore the program asking for v3.12.3 which doesn't actually exist
+# latest ver. available at the time of writing is 0.6.1
+pycolmap>=0.6.1
 
 # Jupyter ecosystem
 jupyter>=1.0.0
