@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  colmap-sfm:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: colmap-sfm
+    ports:
+      - "8888:8888"
+    volumes:
+      # Mount the entire project directory
+      - ..:/app
+      # Mount host directories for input videos and outputs
+      - ../videos:/app/videos
+      - ../data:/app/data
+      - ../output:/app/output
+      - ../temp:/app/temp
+    environment:
+      - PYTHONPATH=/app
+    stdin_open: true
+    tty: true
+    working_dir: /app

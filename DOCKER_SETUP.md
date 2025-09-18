@@ -1,20 +1,20 @@
-# COLMAP-SLAM Docker Setup
+# COLMAP Structure-from-Motion Docker Setup
 
-This document provides instructions for setting up and running the COLMAP-SLAM pipeline in Docker with Jupyter notebook interface.
+This document provides instructions for setting up and running the COLMAP SfM pipeline in Docker with Jupyter notebook interface.
 
 ## Prerequisites
 
-- Docker with GPU support (nvidia-docker2)
-- NVIDIA drivers installed on host
-- At least 8GB GPU memory recommended
-- 16GB+ system RAM recommended
+- Docker installed
+- At least 4GB system RAM
+- Optional: NVIDIA GPU for faster processing
 
 ## Quick Start
 
-1. **Place video files** in the `videos/` directory:
+1. **Place video files or images** in the `data/` directory:
    ```bash
-   mkdir -p videos
-   cp your_video.mp4 videos/
+   mkdir -p data
+   cp your_video.mp4 data/
+   # OR place image sequence in data/images/
    ```
 
 2. **Build and start the container**:
@@ -26,17 +26,17 @@ This document provides instructions for setting up and running the COLMAP-SLAM p
 
 4. **Open the demo notebook**: `notebooks/COLMAP_SLAM_Demo.ipynb`
 
-5. **Results** will be saved to `outputs/` directory on your host machine
+5. **Results** will be saved to `output/` directory on your host machine
 
 ## Directory Structure
 
 ```
 hls/
-├── videos/           # Input videos (mount point)
-├── outputs/          # Processing results (mount point)
+├── data/             # Input videos/images (mount point)
+├── output/           # Processing results (mount point)
+├── temp/             # Temporary processing files
 ├── notebooks/        # Jupyter notebooks
-├── modules/
-│   └── COLMAP_SLAM/  # SLAM pipeline code
+├── modules/          # Other project modules
 ├── Dockerfile        # Docker image definition
 ├── docker-compose.yml
 └── requirements.txt
@@ -46,37 +46,43 @@ hls/
 
 ### Processing a Video
 
-1. **Place your video** in the `videos/` directory
+1. **Place your video** in the `data/` directory
    - Supported formats: .mp4, .avi, .mov, .mkv, .wmv, .flv, .webm
 
 2. **Configure parameters** in the notebook:
    ```python
    CONFIG = {
-       'frame_skip': 5,                    # Extract every 5th frame
-       'max_frames': 100,                  # Process max 100 frames
-       'init_frames': 30,                  # Frames for initialization
-       'optical_flow_threshold': 0.05,     # Keyframe selection
-       'extractor': enums.Extractors.SuperPoint,
-       'matcher': enums.Matchers.SuperGlue,
+       'frame_skip': 10,               # Extract every 10th frame
+       'max_frames': 100,              # Process max 100 frames
+       'resize_factor': 0.5,           # Resize frames to 50%
+       'feature_type': 'SIFT',         # SIFT features
+       'matcher_type': 'exhaustive',   # Exhaustive matching
    }
    ```
 
 3. **Run the notebook cells** in order:
    - Frame extraction from video
-   - SLAM reconstruction
+   - COLMAP reconstruction
    - Results visualization and export
+
+### Processing Image Sequences
+
+1. **Place images** in `data/images/` directory
+2. **Skip frame extraction** step in notebook
+3. **Run COLMAP reconstruction** directly on image directory
 
 ### Output Structure
 
-Each processed video creates a timestamped output directory:
+Each processed video/image sequence creates a timestamped output directory:
 ```
-outputs/
+output/
 └── video_name_20231201_143022/
-    ├── frames/              # Extracted frames
-    ├── reconstruction/      # SLAM results
-    │   ├── colmap/         # COLMAP binary files
-    │   ├── estimation.txt  # Camera trajectory (TUM format)
-    │   └── reconstruction_summary.txt
+    ├── frames/              # Extracted frames (if from video)
+    ├── reconstruction/      # COLMAP results
+    │   ├── 0/              # Reconstruction model
+    │   ├── database.db     # COLMAP database
+    │   ├── points.ply      # Point cloud
+    │   └── trajectory.txt  # Camera poses (TUM format)
     └── visualization/       # Plots and visualizations
         ├── camera_trajectory.png
         └── reconstruction_stats.png
@@ -84,38 +90,44 @@ outputs/
 
 ## Advanced Configuration
 
-### Feature Extractors and Matchers
+### Feature Types
 
-**SuperPoint + SuperGlue** (Recommended for quality):
-- Neural network-based features
-- More robust but slower
-- Requires GPU
+**SIFT Features** (Recommended):
+- Classical, reliable features
+- Good for most scenarios
+- CPU/GPU compatible
 
-**ORB + Hamming** (Faster alternative):
-- Classical features
-- Faster processing
-- Works on CPU
+### Matching Types
+
+**Exhaustive Matching**:
+- Matches every image with every other image
+- Most accurate but slower
+- Good for unordered image sets
+
+**Sequential Matching**:
+- Matches consecutive images
+- Faster for video sequences
+- Good for ordered video frames
 
 ### Performance Tuning
 
 **For faster processing:**
 ```python
 CONFIG = {
-    'frame_skip': 10,           # Skip more frames
+    'frame_skip': 20,           # Skip more frames
     'max_frames': 50,           # Process fewer frames
-    'extractor': enums.Extractors.ORB,
-    'matcher': enums.Matchers.OrbHamming,
+    'resize_factor': 0.25,      # Smaller images
+    'matcher_type': 'sequential',
 }
 ```
 
 **For better quality:**
 ```python
 CONFIG = {
-    'frame_skip': 2,            # Use more frames
+    'frame_skip': 5,            # Use more frames
     'max_frames': 200,          # Process more frames
-    'init_frames': 50,          # More initialization frames
-    'extractor': enums.Extractors.SuperPoint,
-    'matcher': enums.Matchers.SuperGlue,
+    'resize_factor': 0.8,       # Larger images
+    'matcher_type': 'exhaustive',
 }
 ```
 
@@ -124,89 +136,116 @@ CONFIG = {
 ### Common Issues
 
 **Container won't start:**
-- Check Docker and nvidia-docker2 installation
-- Verify GPU drivers: `nvidia-smi`
-- Check disk space (Docker build requires ~5GB)
+- Check Docker installation
+- Verify sufficient disk space (build requires ~3GB)
+- Check port 8888 is not in use
 
-**CUDA/GPU errors:**
-- Fallback to CPU: Set `CUDA_VISIBLE_DEVICES=""`
-- Use ORB features instead of SuperPoint
+**Reconstruction fails:**
+- Check video quality (avoid pure rotation, need translation)
+- Try different frame skip values
+- Ensure sufficient image overlap
+- Check image sharpness (avoid blurry images)
 
 **Memory issues:**
 - Reduce `max_frames` parameter
 - Increase Docker memory limits
-- Use smaller input videos
-
-**Reconstruction fails:**
-- Check video quality (avoid pure rotation, need translation)
-- Reduce `optical_flow_threshold` for more keyframes
-- Increase `init_frames` for better initialization
+- Use smaller input images (`resize_factor`)
 
 ### Logs and Debugging
 
 **View container logs:**
 ```bash
-docker-compose logs colmap-slam
+docker-compose logs colmap-sfm
 ```
 
 **Access container shell:**
 ```bash
-docker-compose exec colmap-slam bash
+docker-compose exec colmap-sfm bash
 ```
 
-**Check GPU usage:**
+**Test COLMAP installation:**
 ```bash
-nvidia-smi
+docker-compose exec colmap-sfm colmap --help
 ```
 
 ## Alternative Usage
 
-### GUI Mode (Linux with X11)
-
-For the original GUI application:
-```bash
-# Enable X11 forwarding
-xhost +local:docker
-
-# Run GUI version
-docker-compose --profile gui up
-```
-
 ### Command Line Processing
 
-Run SLAM directly without Jupyter:
+Run COLMAP directly without Jupyter:
 ```bash
-docker-compose exec colmap-slam python COLMAP_SLAM/pipeline.py
+docker-compose exec colmap-sfm ./test.sh
+```
+
+### Native Installation
+
+For running without Docker:
+```bash
+# Install dependencies
+sudo apt-get install colmap
+pip install -r requirements.txt
+
+# Run notebook
+jupyter lab notebooks/COLMAP_SLAM_Demo.ipynb
 ```
 
 ## File Formats
 
 ### Input
 - **Videos**: MP4, AVI, MOV, MKV, WMV, FLV, WebM
-- **Image sequences**: JPG, PNG (place in `data/` directory)
+- **Image sequences**: JPG, PNG (place in `data/images/` directory)
 
 ### Output
-- **COLMAP files**: cameras.bin, images.bin, points3D.bin
-- **Trajectory**: TUM format (.txt)
-- **Point cloud**: PLY format
+- **COLMAP files**: cameras.bin, images.bin, points3D.bin (in reconstruction/0/)
+- **Trajectory**: TUM format trajectory.txt (timestamp tx ty tz qx qy qz qw)
+- **Point cloud**: PLY format points.ply
+- **Database**: SQLite database.db
 - **Visualizations**: PNG plots
 
 ## Performance Expectations
 
 **Typical processing times** (depends on hardware):
-- Frame extraction: 1-2 minutes for 100 frames
-- SLAM reconstruction: 5-15 minutes for 100 frames
-- Total pipeline: 10-20 minutes per video
+- Frame extraction: 30 seconds - 2 minutes
+- Feature extraction: 1-5 minutes for 100 frames
+- Feature matching: 1-10 minutes depending on method
+- Reconstruction: 1-5 minutes
+- Total pipeline: 5-20 minutes per video
 
 **Resource usage:**
-- GPU memory: 2-4GB (SuperPoint/SuperGlue)
-- System RAM: 4-8GB during processing
-- Disk space: ~1GB per processed video
+- System RAM: 2-8GB during processing
+- Disk space: ~500MB per processed video
+- CPU: Multi-core recommended
+
+## Camera Model Support
+
+COLMAP automatically detects camera parameters from:
+- **EXIF data** in images
+- **Manual configuration** in notebook
+- **Automatic calibration** during reconstruction
+
+Supported camera models:
+- SIMPLE_PINHOLE
+- PINHOLE
+- SIMPLE_RADIAL
+- RADIAL
+- OPENCV
+- FULL_OPENCV
+
+## Quality Tips
+
+**For best reconstruction quality:**
+1. **Good camera motion**: Combine translation and rotation
+2. **Sufficient overlap**: 60-80% overlap between consecutive images
+3. **Sharp images**: Avoid motion blur
+4. **Textured scenes**: Avoid featureless walls or surfaces
+5. **Consistent lighting**: Avoid extreme lighting changes
+6. **Stable camera**: Reduce camera shake
 
 ## Next Steps
 
 After processing:
 1. **Analyze results** in the output visualization plots
-2. **Import COLMAP files** into other software (MeshLab, CloudCompare)
-3. **Use trajectory data** for further analysis or applications
-4. **Experiment with parameters** for different video types
+2. **Import point cloud** into 3D software (MeshLab, CloudCompare, Blender)
+3. **Use trajectory data** for camera path analysis
+4. **Export to other formats** using COLMAP tools
+5. **Experiment with parameters** for different scenes

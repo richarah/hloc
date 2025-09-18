@@ -1,6 +1,3 @@
-[submodule "COLMAP_SLAM"]
-	path = modules/COLMAP_SLAM
-	url = https://github.com/richarah/COLMAP_SLAM
 [submodule "modules/Skye"]
 	path = modules/Skye
 	url = https://github.com/m-schuetz/Skye
@@ -10,3 +7,6 @@
 [submodule "modules/voxelprojection"]
 	path = modules/voxelprojection
 	url = https://github.com/richarah/voxelprojection.git
+[submodule "modules/hloc"]
+	path = modules/hloc
+	url = https://github.com/cvg/Hierarchical-Localization/

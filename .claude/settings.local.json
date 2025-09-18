@@ -8,7 +8,13 @@
       "Bash(docker-compose:*)",
       "Bash(dos2unix:*)",
       "WebFetch(domain:colmap.github.io)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git submodule:*)",
+      "Bash(ls:*)",
+      "Bash(git rm:*)",
+      "Bash(rm:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
