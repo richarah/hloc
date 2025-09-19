@@ -39,7 +39,11 @@ jupyter lab
 # Open notebooks/COLMAP_SLAM_Demo.ipynb
 ```
 
-## Modules
+## A note on nested submodules
+
+git submodule init
+git submodule update --init --recursive --remote
+git submodule sync
 
 ### Active Components
 
