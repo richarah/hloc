@@ -9,4 +9,4 @@
 	url = https://github.com/richarah/voxelprojection.git
 [submodule "modules/hloc"]
 	path = modules/hloc
-	url = https://github.com/cvg/Hierarchical-Localization/
+	url = https://github.com/richarah/hloc.git
