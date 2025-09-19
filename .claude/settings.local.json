@@ -25,7 +25,10 @@
       "Bash(git remote remove:*)",
       "Bash(git checkout:*)",
       "Bash(git remote set-url:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git clone:*)",
+      "Bash(docker exec:*)",
+      "Bash(sudo rm:*)"
     ],
     "deny": []
   }
