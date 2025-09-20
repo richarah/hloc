@@ -21,7 +21,7 @@ services:
     stdin_open: true
     tty: true
     working_dir: /app
-    shm_size: '2gb'
+    shm_size: '1gb'
     deploy:
       resources:
         reservations:
