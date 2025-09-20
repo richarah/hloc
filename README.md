@@ -12,18 +12,26 @@ git submodule update --init --recursive --remote
 git submodule sync
 
 # Using Docker (recommended)
-docker-compose up --build
-
-# Then open notebooks/COLMAP_SLAM_Demo.ipynb in Jupyter, 127.0.0.1 port 8888
+docker-compose up
 ```
 
-**Optional:**
-- CUDA (for GPU acceleration)
-- CMake (for building C++ modules)
+## The big idea / VoPR pipeline
+1. input all the videos/photos in the zone of operation. drone footage, photos, cctv, everything. (NB: DO NOT INCLUDE IMAGES WITH FIDUCIAL MARKERS; this may confuse the feature matching algo later on)
+2. generate a point cloud from these.
+3. calibrate the cameras we want to use and get a picture from them, use this with hloc and our point cloud for relative localisation (where are cameras in relation to each other?)
+4. compare with Ground Control Points, known camera positions, or distances between known GPS coords to calculate absolute scale.
+optionally: place object of known size at a known position within the FOV of a camera. log its position within the point cloud. repeat for multiple cameras. use this data to create a mapping between realspace and pointcloud-space
+5. run voxel-projection, detect stuff
 
-The project uses Jupyter notebooks for interactive testing and development, these can be found under `./notebooks`.
-
-## Roadmap
-
-- Explore replacing Sinkhorn algo with sparse Newton-Sinkhorn https://arxiv.org/html/2401.12253v1/#S6
+## To do
+- something to figure out if we are indoors or outdoors and select a solver accordingly, unless we set manually
+- checkpoints
+- post-generation localisation workflow
+- relative-to-absolute scale workflow
+- camera calibration (intrinsic and extrinsic)
+- luke bort urelevant data
+- further research into SNS solver and necessary iters to get acceptable results
 - Skye integration for real time visualisation
+- assess impact of removing thread cap in /mnt/c/Users/rahay/Documents/hls/modules/hloc/hloc/reconstruction.py:112
+- feature matching match_features.py:242,244 diminishing returns?
+- make COLMAP defaults less conservative?
