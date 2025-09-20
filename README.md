@@ -24,11 +24,11 @@ optionally: place object of known size at a known position within the FOV of a c
 5. run voxel-projection, detect stuff
 
 ## To do
-- something to figure out if we are indoors or outdoors and select a solver accordingly, unless we set manually
-- checkpoints
 - post-generation localisation workflow
 - relative-to-absolute scale workflow
 - camera calibration (intrinsic and extrinsic)
+- something to figure out if we are indoors or outdoors and select a solver accordingly, unless we set manually
+- checkpoints
 - luke bort urelevant data
 - further research into SNS solver and necessary iters to get acceptable results
 - Skye integration for real time visualisation
