@@ -26,8 +26,9 @@ optionally: place object of known size at a known position within the FOV of a c
 ## To do
 - post-generation localisation workflow
 - relative-to-absolute scale workflow
-- camera calibration (intrinsic and extrinsic)
+- intrinsic calibration (work out distortion factor of camera)
 - something to figure out if we are indoors or outdoors and select a solver accordingly, unless we set manually
+- charuco: already solved, detect_diamonds.cpp?
 - checkpoints
 - luke bort urelevant data
 - further research into SNS solver and necessary iters to get acceptable results
