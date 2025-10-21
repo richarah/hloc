@@ -1,5 +1,6 @@
 import argparse
 import multiprocessing
+import re
 import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -16,6 +17,35 @@ from .triangulation import (
     parse_option_args,
 )
 from .utils.io import open_colmap_database
+
+
+def create_sanitized_pairs_file(pairs_path: Path, output_path: Path) -> Path:
+    """
+    Create a sanitized pairs file for pycolmap that handles spaces in filenames.
+    Uses tab separator instead of space to avoid splitting issues.
+    """
+    with open(str(pairs_path), "r") as f_in, open(str(output_path), "w") as f_out:
+        for line in f_in:
+            line = line.strip()
+            if not line:
+                continue
+            # Handle image paths with spaces by using non-greedy match on common image extensions
+            match = re.match(
+                r'(.+?\.(?:jpg|jpeg|png|bmp|tiff|tif))\s+(.+?\.(?:jpg|jpeg|png|bmp|tiff|tif))$',
+                line,
+                re.IGNORECASE
+            )
+            if match:
+                # Write with tab separator for pycolmap
+                f_out.write(f"{match.group(1)}\t{match.group(2)}\n")
+            else:
+                # Passthrough if simple format
+                parts = line.split()
+                if len(parts) == 2:
+                    f_out.write(f"{parts[0]}\t{parts[1]}\n")
+                else:
+                    logger.warning(f"Could not parse pair line: {line}")
+    return output_path
 
 
 def create_empty_db(database_path: Path):
@@ -75,6 +105,10 @@ def incremental_mapping(
                 desc=f"Reconstruction {len(pbars)}",
                 unit="images",
                 postfix="registered",
+                mininterval=3.0,      # Update every 3 seconds max (reduces screen scrollback pollution)
+                miniters=10,          # Update after at least 10 iterations (additional rate limiting)
+                smoothing=0.5,        # Smooth the speed estimate (0=instant, 1=infinite)
+                leave=False,          # Don't leave progress bar in scrollback after completion
             )
         )
         pbars[-1].update(2)
@@ -167,18 +201,23 @@ def main(
     create_empty_db(database)
     import_images(image_dir, database, camera_mode, image_list, image_options)
     image_ids = get_image_ids(database)
+
+    # Create sanitized pairs file for pycolmap (handles spaces in filenames)
+    sanitized_pairs = sfm_dir / "pairs-sanitized.txt"
+    create_sanitized_pairs_file(pairs, sanitized_pairs)
+
     with open_colmap_database(database) as db:
         import_features(image_ids, db, features)
         import_matches(
             image_ids,
             db,
-            pairs,
+            sanitized_pairs,  # Use sanitized pairs file
             matches,
             min_match_score,
             skip_geometric_verification,
         )
     if not skip_geometric_verification:
-        estimation_and_geometric_verification(database, pairs, verbose)
+        estimation_and_geometric_verification(database, sanitized_pairs, verbose)  # Use sanitized pairs
     reconstruction = run_reconstruction(
         sfm_dir, database, image_dir, verbose, mapper_options
     )

@@ -1,4 +1,5 @@
 import argparse
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -65,7 +66,33 @@ def import_matches(
     logger.info("Importing matches into the database...")
 
     with open(str(pairs_path), "r") as f:
-        pairs = [p.split() for p in f.readlines()]
+        pairs = []
+        for line in f.readlines():
+            line = line.strip()
+            if not line:
+                continue
+            # First try splitting by tab (for sanitized pairs files)
+            if '\t' in line:
+                parts = line.split('\t')
+                if len(parts) == 2:
+                    pairs.append((parts[0], parts[1]))
+                    continue
+            # Handle image paths with spaces by using non-greedy match on common image extensions
+            # Pattern: path1.ext whitespace path2.ext (where .ext is jpg, jpeg, png, bmp, tiff, tif)
+            match = re.match(
+                r'(.+?\.(?:jpg|jpeg|png|bmp|tiff|tif))\s+(.+?\.(?:jpg|jpeg|png|bmp|tiff|tif))$',
+                line,
+                re.IGNORECASE
+            )
+            if match:
+                pairs.append((match.group(1), match.group(2)))
+            else:
+                # Fallback to simple split for paths without spaces
+                parts = line.split()
+                if len(parts) == 2:
+                    pairs.append((parts[0], parts[1]))
+                else:
+                    logger.warning(f"Could not parse pair line: {line}")
 
     matched = set()
     for name0, name1 in tqdm(pairs):

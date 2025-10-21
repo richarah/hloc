@@ -46,7 +46,23 @@ def parse_retrieval(path):
         for p in f.read().rstrip("\n").split("\n"):
             if len(p) == 0:
                 continue
-            q, r = p.split()
+            parts = p.split()
+            if len(parts) == 2:
+                # Simple case: no spaces in filenames
+                q, r = parts
+            else:
+                # Handle filenames with spaces: split only on the space between two .jpg/.png/.jpeg paths
+                # Find where the first image path ends (after .jpg, .png, etc.)
+                for i, part in enumerate(parts):
+                    if part.endswith(('.jpg', '.png', '.jpeg', '.JPG', '.PNG', '.JPEG')):
+                        # First image ends here, rest is the second image
+                        q = ' '.join(parts[:i+1])
+                        r = ' '.join(parts[i+1:])
+                        break
+                else:
+                    # Fallback: couldn't find image extension, skip this line
+                    logger.warning(f"Could not parse retrieval line: {p}")
+                    continue
             retrieval[q].append(r)
     return dict(retrieval)
 
