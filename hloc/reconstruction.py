@@ -113,11 +113,23 @@ def incremental_mapping(
         )
         pbars[-1].update(2)
 
+    # Convert dictionary options to IncrementalPipelineOptions object
+    pipeline_options = pycolmap.IncrementalPipelineOptions()
+    if options:
+        # Set mapper options (these are nested under pipeline_options.mapper)
+        for key, value in options.items():
+            if hasattr(pipeline_options.mapper, key):
+                setattr(pipeline_options.mapper, key, value)
+            elif hasattr(pipeline_options, key):
+                setattr(pipeline_options, key, value)
+            else:
+                logger.warning(f"Unknown mapper option: {key}")
+
     reconstructions = pycolmap.incremental_mapping(
-        database_path,
-        image_dir,
-        sfm_path,
-        options=options or {},
+        str(database_path),
+        str(image_dir),
+        str(sfm_path),
+        options=pipeline_options,
         initial_image_pair_callback=restart_progress_bar,
         next_image_callback=lambda: pbars[-1].update(1),
     )
