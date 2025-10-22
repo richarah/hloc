@@ -149,7 +149,7 @@ def run_reconstruction(
     logger.info("Running 3D reconstruction...")
     if options is None:
         options = {}
-    options = {"num_threads": min(multiprocessing.cpu_count(), 16), **options}
+    options = {"num_threads": min(multiprocessing.cpu_count(), 64), **options}
 
     with OutputCapture(verbose):
         reconstructions = incremental_mapping(
