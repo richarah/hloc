@@ -1,6 +1,7 @@
 import argparse
 import collections.abc as collections
 import glob
+import multiprocessing
 import pprint
 from pathlib import Path
 from types import SimpleNamespace
@@ -260,7 +261,7 @@ def main(
     model = Model(conf["model"]).eval().to(device)
 
     loader = torch.utils.data.DataLoader(
-        dataset, num_workers=1, batch_size=16, shuffle=False, pin_memory=True
+        dataset, num_workers=min(multiprocessing.cpu_count(), 8), batch_size=16, shuffle=False, pin_memory=True
     )
     for batch_idx, data in enumerate(tqdm(loader)):
         # Get batch size (may be less than 16 for last batch)

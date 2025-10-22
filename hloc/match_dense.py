@@ -1,4 +1,5 @@
 import argparse
+import multiprocessing
 import pprint
 from collections import Counter, defaultdict
 from itertools import chain
@@ -242,7 +243,7 @@ def match_dense(
 
     dataset = ImagePairDataset(image_dir, conf["preprocessing"], pairs)
     loader = torch.utils.data.DataLoader(
-        dataset, num_workers=16, batch_size=1, shuffle=False
+        dataset, num_workers=min(multiprocessing.cpu_count(), 8), batch_size=1, shuffle=False
     )
 
     logger.info("Performing dense matching...")
