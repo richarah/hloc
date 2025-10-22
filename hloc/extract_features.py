@@ -260,46 +260,58 @@ def main(
     model = Model(conf["model"]).eval().to(device)
 
     loader = torch.utils.data.DataLoader(
-        dataset, num_workers=1, shuffle=False, pin_memory=True
+        dataset, num_workers=1, batch_size=16, shuffle=False, pin_memory=True
     )
-    for idx, data in enumerate(tqdm(loader)):
-        name = dataset.names[idx]
+    for batch_idx, data in enumerate(tqdm(loader)):
+        # Get batch size (may be less than 16 for last batch)
+        current_batch_size = data["image"].shape[0]
+        start_idx = batch_idx * 16
+        names = dataset.names[start_idx:start_idx + current_batch_size]
+
+        # Process batch through model
         pred = model({"image": data["image"].to(device, non_blocking=True)})
-        pred = {k: v[0].cpu().numpy() for k, v in pred.items()}
 
-        pred["image_size"] = original_size = data["original_size"][0].numpy()
-        if "keypoints" in pred:
-            size = np.array(data["image"].shape[-2:][::-1])
-            scales = (original_size / size).astype(np.float32)
-            pred["keypoints"] = (pred["keypoints"] + 0.5) * scales[None] - 0.5
-            if "scales" in pred:
-                pred["scales"] *= scales.mean()
-            # add keypoint uncertainties scaled to the original resolution
-            uncertainty = getattr(model, "detection_noise", 1) * scales.mean()
+        # Process each image in the batch
+        for i in range(current_batch_size):
+            name = names[i]
+            # Extract predictions for this image from batch
+            pred_single = {k: v[i].cpu().numpy() for k, v in pred.items()}
 
-        if as_half:
-            for k in pred:
-                dt = pred[k].dtype
-                if (dt == np.float32) and (dt != np.float16):
-                    pred[k] = pred[k].astype(np.float16)
+            pred_single["image_size"] = original_size = data["original_size"][i].numpy()
+            if "keypoints" in pred_single:
+                size = np.array(data["image"].shape[-2:][::-1])
+                scales = (original_size / size).astype(np.float32)
+                pred_single["keypoints"] = (pred_single["keypoints"] + 0.5) * scales[None] - 0.5
+                if "scales" in pred_single:
+                    pred_single["scales"] *= scales.mean()
+                # add keypoint uncertainties scaled to the original resolution
+                uncertainty = getattr(model, "detection_noise", 1) * scales.mean()
 
-        with h5py.File(str(feature_path), "a", libver="latest") as fd:
-            try:
-                if name in fd:
-                    del fd[name]
-                grp = fd.create_group(name)
-                for k, v in pred.items():
-                    grp.create_dataset(k, data=v)
-                if "keypoints" in pred:
-                    grp["keypoints"].attrs["uncertainty"] = uncertainty
-            except OSError as error:
-                if "No space left on device" in error.args[0]:
-                    logger.error(
-                        "Out of disk space: storing features on disk can take "
-                        "significant space, did you enable the as_half flag?"
-                    )
-                    del grp, fd[name]
-                raise error
+            if as_half:
+                for k in pred_single:
+                    dt = pred_single[k].dtype
+                    if (dt == np.float32) and (dt != np.float16):
+                        pred_single[k] = pred_single[k].astype(np.float16)
+
+            with h5py.File(str(feature_path), "a", libver="latest") as fd:
+                try:
+                    if name in fd:
+                        del fd[name]
+                    grp = fd.create_group(name)
+                    for k, v in pred_single.items():
+                        grp.create_dataset(k, data=v)
+                    if "keypoints" in pred_single:
+                        grp["keypoints"].attrs["uncertainty"] = uncertainty
+                except OSError as error:
+                    if "No space left on device" in error.args[0]:
+                        logger.error(
+                            "Out of disk space: storing features on disk can take "
+                            "significant space, did you enable the as_half flag?"
+                        )
+                        del grp, fd[name]
+                    raise error
+
+            del pred_single
 
         del pred
 
